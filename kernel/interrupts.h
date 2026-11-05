@@ -8,5 +8,7 @@ void init_pic(void);
 void init_keyboard(void);
 void enable_interrupts(void);
 void disable_interrupts(void);
+void keyboard_irq_handler(void);
+void keyboard_scancode_handler(uint8_t code);
 
 #endif

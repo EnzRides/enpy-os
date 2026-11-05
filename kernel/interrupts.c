@@ -3,7 +3,6 @@
 #define IDT_ENTRY_COUNT 256
 #define KERNEL_CS 0x08
 #define IDT_GATE_PRESENT 0x80
-#define IDT_GATE_RING0 0x00
 #define IDT_GATE_TYPE_INT 0x0E
 
 struct idt_entry {
@@ -24,6 +23,7 @@ static struct idt_ptr idtp;
 
 extern void idt_flush(uint32_t idt_ptr_address);
 extern void isr_stub(void);
+extern void irq1_stub(void);
 
 static inline void outb(uint16_t port, uint8_t value) {
     __asm__ volatile ("outb %0, %1" : : "a"(value), "Nd"(port));
@@ -45,16 +45,18 @@ static void idt_set_gate(uint8_t num, uint32_t base, uint16_t selector, uint8_t 
 
 void init_idt(void) {
     idtp.limit = sizeof(idt) - 1;
-    idtp.base = (uint32_t)&idt;
+    idtp.base = (uint32_t)idt;
 
     for (uint16_t i = 0; i < IDT_ENTRY_COUNT; ++i) {
-        idt_set_gate(i, (uint32_t)&isr_stub, KERNEL_CS, IDT_GATE_PRESENT | IDT_GATE_RING0 | IDT_GATE_TYPE_INT);
+        idt_set_gate((uint8_t)i, (uint32_t)isr_stub, KERNEL_CS,
+                     IDT_GATE_PRESENT | IDT_GATE_TYPE_INT);
     }
-
+    idt_set_gate(0x21, (uint32_t)irq1_stub, KERNEL_CS,
+                 IDT_GATE_PRESENT | IDT_GATE_TYPE_INT);
     idt_flush((uint32_t)&idtp);
 }
 
-void init_pic(void) {
+static void remap_pic(void) {
     outb(0x20, 0x11);
     outb(0xA0, 0x11);
     outb(0x21, 0x20);
@@ -63,20 +65,32 @@ void init_pic(void) {
     outb(0xA1, 0x02);
     outb(0x21, 0x01);
     outb(0xA1, 0x01);
-    outb(0x21, 0x00);
-    outb(0xA1, 0x00);
+}
+
+void init_pic(void) {
+    remap_pic();
+    outb(0x21, 0xFF);
+    outb(0xA1, 0xFF);
 }
 
 void init_keyboard(void) {
-    init_pic();
+    remap_pic();
+    /* Unmask only IRQ1 (keyboard); leave all other IRQs masked. */
     outb(0x21, 0xFD);
     outb(0xA1, 0xFF);
 }
 
+void keyboard_irq_handler(void) {
+    uint8_t scancode = inb(0x60);
+    extern void keyboard_scancode_handler(uint8_t code);
+    keyboard_scancode_handler(scancode);
+    outb(0x20, 0x20);
+}
+
 void enable_interrupts(void) {
-    __asm__ volatile ("sti");
+    __asm__ volatile ("sti" ::: "memory");
 }
 
 void disable_interrupts(void) {
-    __asm__ volatile ("cli");
+    __asm__ volatile ("cli" ::: "memory");
 }
