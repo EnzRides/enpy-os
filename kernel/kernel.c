@@ -25,13 +25,14 @@ void kernel_main(void) {
     clear_screen();
     write_at("ENPY OS", 8, 34, 0x0B);
     write_at("Milestone 2: interrupt infrastructure", 11, 18, 0x07);
-    write_at("Loading IDT and PIC setup...", 13, 20, 0x0E);
+    write_at("Kernel initialization complete.", 13, 18, 0x0E);
 
-    init_idt();
-    init_keyboard();
-    enable_interrupts();
-
-    write_at("Interrupts enabled.", 15, 29, 0x0A);
+    /*
+     * The kernel has a basic IDT and PIC setup, but the handler table is not yet
+     * complete enough to safely enable interrupts. Leaving interrupts disabled
+     * prevents undefined CPU behavior while we work toward proper IRQ handlers.
+     */
+    write_at("Interrupts remain disabled until handlers are complete.", 15, 8, 0x0A);
     write_at("Kernel is alive and waiting.", 17, 23, 0x0F);
 
     for (;;) {
