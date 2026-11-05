@@ -64,31 +64,14 @@ static void draw_desktop(void) {
 }
 
 void keyboard_scancode_handler(uint8_t code) {
-    if (code & 0x80) return; /* Ignore key releases. */
-
+    if (code & 0x80) return;
     if (screen == SCREEN_MENU) {
-        if (code == 0x02) {
-            screen = SCREEN_INSTALLER;
-            draw_installer();
-        } else if (code == 0x03) {
-            screen = SCREEN_DESKTOP;
-            draw_desktop();
-        }
-        return;
-    }
-
-    if (screen == SCREEN_INSTALLER) {
-        if (code == 0x1C) {
-            screen = SCREEN_DESKTOP;
-            draw_desktop();
-        } else if (code == 0x01) {
-            screen = SCREEN_MENU;
-            draw_menu();
-        }
-        return;
-    }
-
-    if (screen == SCREEN_DESKTOP && code == 0x01) {
+        if (code == 0x02) { screen = SCREEN_INSTALLER; draw_installer(); }
+        else if (code == 0x03) { screen = SCREEN_DESKTOP; draw_desktop(); }
+    } else if (screen == SCREEN_INSTALLER) {
+        if (code == 0x1C) { screen = SCREEN_DESKTOP; draw_desktop(); }
+        else if (code == 0x01) { screen = SCREEN_MENU; draw_menu(); }
+    } else if (screen == SCREEN_DESKTOP && code == 0x01) {
         screen = SCREEN_MENU;
         draw_menu();
     }
@@ -96,10 +79,11 @@ void keyboard_scancode_handler(uint8_t code) {
 
 void kernel_main(void) {
     disable_interrupts();
-    init_idt();
-    init_keyboard();
     screen = SCREEN_MENU;
     draw_menu();
-    enable_interrupts();
-    for (;;) __asm__ volatile ("hlt");
+    /* Poll the PS/2 data port with CPU interrupts disabled to avoid IRQ reset loops. */
+    for (;;) {
+        (void)keyboard_poll();
+        __asm__ volatile ("pause");
+    }
 }

@@ -35,10 +35,6 @@ static inline uint8_t inb(uint16_t port) {
     return value;
 }
 
-static inline void io_wait(void) {
-    outb(0x80, 0);
-}
-
 static void idt_set_gate(uint8_t num, uint32_t base, uint16_t selector, uint8_t flags) {
     idt[num].base_low = (uint16_t)(base & 0xFFFF);
     idt[num].selector = selector;
@@ -50,26 +46,23 @@ static void idt_set_gate(uint8_t num, uint32_t base, uint16_t selector, uint8_t 
 void init_idt(void) {
     idtp.limit = sizeof(idt) - 1;
     idtp.base = (uint32_t)idt;
-
-    for (uint16_t i = 0; i < IDT_ENTRY_COUNT; ++i) {
+    for (uint16_t i = 0; i < IDT_ENTRY_COUNT; ++i)
         idt_set_gate((uint8_t)i, (uint32_t)isr_stub, KERNEL_CS,
                      IDT_GATE_PRESENT | IDT_GATE_TYPE_INT);
-    }
-    /* IRQ1 after PIC remapping to vectors 0x20-0x2F. */
     idt_set_gate(0x21, (uint32_t)irq1_stub, KERNEL_CS,
                  IDT_GATE_PRESENT | IDT_GATE_TYPE_INT);
     idt_flush((uint32_t)&idtp);
 }
 
 static void remap_pic(void) {
-    outb(0x20, 0x11); io_wait();
-    outb(0xA0, 0x11); io_wait();
-    outb(0x21, 0x20); io_wait();
-    outb(0xA1, 0x28); io_wait();
-    outb(0x21, 0x04); io_wait();
-    outb(0xA1, 0x02); io_wait();
-    outb(0x21, 0x01); io_wait();
-    outb(0xA1, 0x01); io_wait();
+    outb(0x20, 0x11); outb(0x80, 0);
+    outb(0xA0, 0x11); outb(0x80, 0);
+    outb(0x21, 0x20); outb(0x80, 0);
+    outb(0xA1, 0x28); outb(0x80, 0);
+    outb(0x21, 0x04); outb(0x80, 0);
+    outb(0xA1, 0x02); outb(0x80, 0);
+    outb(0x21, 0x01); outb(0x80, 0);
+    outb(0xA1, 0x01); outb(0x80, 0);
 }
 
 void init_pic(void) {
@@ -78,50 +71,21 @@ void init_pic(void) {
     outb(0xA1, 0xFF);
 }
 
-/* Wait for the PS/2 controller input buffer to become available. */
-static int ps2_wait_input_clear(void) {
-    for (uint32_t i = 0; i < 100000; ++i) {
-        if ((inb(0x64) & 0x02) == 0) return 1;
-    }
-    return 0;
-}
-
-/* Wait for a byte from the PS/2 controller. */
-static int ps2_wait_output_full(void) {
-    for (uint32_t i = 0; i < 100000; ++i) {
-        if (inb(0x64) & 0x01) return 1;
-    }
-    return 0;
+/* Polling avoids enabling hardware IRQs until their handler path is verified. */
+int keyboard_poll(void) {
+    if ((inb(0x64) & 0x01) == 0) return 0;
+    uint8_t scancode = inb(0x60);
+    extern void keyboard_scancode_handler(uint8_t code);
+    keyboard_scancode_handler(scancode);
+    return 1;
 }
 
 void init_keyboard(void) {
-    /* Keep interrupts disabled while PIC and PS/2 state is configured. */
+    /* Keep legacy callers safe: keyboard input is polled, not IRQ driven. */
     __asm__ volatile ("cli" ::: "memory");
     remap_pic();
     outb(0x21, 0xFF);
     outb(0xA1, 0xFF);
-
-    /* Enable the first PS/2 port, then turn on its IRQ in the controller. */
-    if (ps2_wait_input_clear()) outb(0x64, 0xAE);
-    if (ps2_wait_input_clear()) {
-        outb(0x64, 0x20);
-        if (ps2_wait_output_full()) {
-            uint8_t config = inb(0x60);
-            config |= 0x01;       /* IRQ1 enabled */
-            config &= (uint8_t)~0x10; /* first PS/2 port clock enabled */
-            if (ps2_wait_input_clear()) {
-                outb(0x64, 0x60);
-                if (ps2_wait_input_clear()) outb(0x60, config);
-            }
-        }
-    }
-
-    /* Discard any stale scan byte before unmasking IRQ1. */
-    if (inb(0x64) & 0x01) (void)inb(0x60);
-
-    /* Unmask only IRQ1; keep timer and all other IRQs masked. */
-    outb(0xA1, 0xFF);
-    outb(0x21, 0xFD);
 }
 
 void keyboard_irq_handler(void) {
