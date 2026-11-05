@@ -5,7 +5,9 @@
 .set MBMAGIC,    0x1BADB002
 .set MBCHECKSUM, -(MBMAGIC + MBFLAGS)
 
-.section .multiboot
+/* The alloc flag keeps this header in the loadable ELF image. GRUB scans the
+ * first 8 KiB of the file for it. */
+.section .multiboot,"a"
 .align 4
 .long MBMAGIC
 .long MBFLAGS
