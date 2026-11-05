@@ -101,21 +101,22 @@ static int mouse_command(uint8_t command) {
     return (status & 0x20) && response == 0xFA;
 }
 
-void init_mouse(void) {
-    /* Enable the auxiliary PS/2 port, leaving its IRQ disabled for polling. */
-    if (!wait_input_clear()) return;
+int init_mouse(void) {
+    /* Enable the auxiliary PS/2 port and keep it available for polling. */
+    if (!wait_input_clear()) return 0;
     outb(0x64, 0xA8);
-    if (!wait_input_clear()) return;
+    if (!wait_input_clear()) return 0;
     outb(0x64, 0x20);
-    if (!wait_output_full()) return;
+    if (!wait_output_full()) return 0;
     uint8_t config = inb(0x60);
-    config = (uint8_t)((config | 0x20) & (uint8_t)~0x02);
-    if (!wait_input_clear()) return;
+    /* Clear mouse-clock-disable and keep mouse IRQ12 disabled (polled input). */
+    config = (uint8_t)(config & (uint8_t)~0x22);
+    if (!wait_input_clear()) return 0;
     outb(0x64, 0x60);
-    if (!wait_input_clear()) return;
+    if (!wait_input_clear()) return 0;
     outb(0x60, config);
-    (void)mouse_command(0xF6); /* Set defaults. */
-    (void)mouse_command(0xF4); /* Enable streaming. */
+    if (!mouse_command(0xF6)) return 0; /* Set defaults. */
+    return mouse_command(0xF4);         /* Enable streaming. */
 }
 
 int mouse_poll(int *dx, int *dy, uint8_t *buttons) {
@@ -125,14 +126,14 @@ int mouse_poll(int *dx, int *dy, uint8_t *buttons) {
     if ((status & 1) == 0 || (status & 0x20) == 0) return 0;
     uint8_t data = inb(0x60);
     if (packet_index == 0) {
-        if ((data & 0x08) == 0) return 0; /* Synchronize at packet byte 0. */
+        if ((data & 0x08) == 0) return 0;
         packet[packet_index++] = data;
         return 0;
     }
     packet[packet_index++] = data;
     if (packet_index < 3) return 0;
     packet_index = 0;
-    if (packet[0] & 0xC0) return 0; /* Ignore overflow packets. */
+    if (packet[0] & 0xC0) return 0;
     *dx = (int)(int8_t)packet[1];
     *dy = -(int)(int8_t)packet[2];
     *buttons = packet[0] & 0x07;

@@ -48,7 +48,8 @@ static void pixel_physical(int x, int y, uint32_t color) {
 
 static void rect(int x, int y, int w, int h, uint32_t color) {
     int x0 = sx(x), x1 = sx(x + w), y0 = sy(y), y1 = sy(y + h);
-    if (x0 < 0) x0 = 0; if (y0 < 0) y0 = 0;
+    if (x0 < 0) x0 = 0;
+    if (y0 < 0) y0 = 0;
     if (x1 > (int)fb_width) x1 = (int)fb_width;
     if (y1 > (int)fb_height) y1 = (int)fb_height;
     for (int py = y0; py < y1; ++py)
@@ -179,21 +180,21 @@ static void draw_taskbar(void) {
         text(194,568,active_window==1?"FILES":active_window==2?"TERM":"ABOUT",white,1);
     }
     text(700,568,"ENPY",muted,1);
+    text(615,568,mouse_available?"MOUSE":"NO MOUSE",muted,1);
 }
 
 static void draw_pointer(void) {
     int x=mouse_x, y=mouse_y;
     for (int row=0;row<16;++row) {
         int width= row<11 ? row/2+1 : 7-(row-11)/2;
-        for (int col=0;col<width;++col) {
+        for (int col=0;col<width;++col)
             rect(x+col,y+row,1,1,col==0||row==0?COLOR(8,15,28):white);
-        }
     }
 }
 
 static void draw_desktop(void) {
     draw_wallpaper();
-    rect(0,0,LOGICAL_W,42,COLOR(8,17,34));
+    rect(0,0,LOGICAL_W,42,navy);
     text(20,14,"ENPY OS",white,2);
     text(165,17,"DESKTOP",muted,1);
     draw_icon(28,78,"FILES",0);
@@ -260,7 +261,7 @@ void kernel_main(uint32_t multiboot_address) {
     fb_bpp=mbi->framebuffer_bpp;
     mouse_x=(int)fb_width/2;
     mouse_y=(int)fb_height/2;
-    init_mouse();
+    mouse_available=init_mouse();
     draw_desktop();
 
     for (;;) {
