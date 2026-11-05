@@ -22,20 +22,15 @@ static void write_at(const char *text, size_t row, size_t column, uint8_t color)
 }
 
 void kernel_main(void) {
+    /* Keep interrupts disabled until proper exception and IRQ handlers exist. */
+    disable_interrupts();
     clear_screen();
     write_at("ENPY OS", 8, 34, 0x0B);
-    write_at("Milestone 2: interrupt infrastructure", 11, 18, 0x07);
-    write_at("Kernel initialization complete.", 13, 18, 0x0E);
-
-    /*
-     * The kernel has a basic IDT and PIC setup, but the handler table is not yet
-     * complete enough to safely enable interrupts. Leaving interrupts disabled
-     * prevents undefined CPU behavior while we work toward proper IRQ handlers.
-     */
-    write_at("Interrupts remain disabled until handlers are complete.", 15, 8, 0x0A);
-    write_at("Kernel is alive and waiting.", 17, 23, 0x0F);
+    write_at("Kernel booted successfully.", 11, 25, 0x07);
+    write_at("No IRQ handlers installed yet.", 13, 25, 0x0E);
+    write_at("Interrupts safely remain disabled.", 15, 23, 0x0A);
 
     for (;;) {
-        __asm__ volatile ("cli; hlt");
+        __asm__ volatile ("hlt");
     }
 }
