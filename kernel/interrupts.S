@@ -25,14 +25,4 @@ idt_flush:
     lidt (%eax)
     ret
 
-.global enable_interrupts
-.type enable_interrupts, @function
-enable_interrupts:
-    sti
-    ret
-
-.global disable_interrupts
-.type disable_interrupts, @function
-disable_interrupts:
-    cli
-    ret
+.section .note.GNU-stack,"",@progbits
