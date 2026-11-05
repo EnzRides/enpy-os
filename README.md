@@ -1,21 +1,27 @@
 # ENPY OS
 
-An original, open-source desktop OS project built on a Linux foundation. ENPY aims to provide a clear, accessible desktop experience with its own identity—not a copy of Windows or another proprietary OS.
+ENPY OS is an original, open-source hobby operating system project. It is not a Windows clone.
 
-> **Status:** Early prototype. This repository is not yet a bootable operating system. The `ui/` directory is a browser-based interface prototype.
+> **Status:** Experimental, 32-bit x86 bootable kernel starter. It boots through GRUB and writes directly to VGA text memory. It is not yet a general-purpose OS: there is no real login, multitasking, networking, disk/filesystem support, or hardware driver suite.
 
-## Prototype
-Open `ui/index.html` in a browser to try the login-to-desktop flow. The demo has no real authentication and must not be used to protect data or accounts.
+## Build and run
+See [`docs/bootable-kernel.md`](docs/bootable-kernel.md) for toolchain setup and commands. The first milestone targets an x86 PC emulator (QEMU) and uses GRUB as the bootloader; the kernel itself is a small freestanding C/assembly program.
 
-## Project roadmap
-1. Validate the original ENPY desktop experience with the web prototype.
-2. Select a Linux base and desktop technology (for example, a Wayland shell using Qt/QML).
-3. Implement a real session/login integration using existing Linux components rather than custom password handling.
-4. Add settings, file manager integration, accessibility, localization, and application discovery.
-5. Create reproducible builds and an installer only after the desktop is functional and tested.
+```sh
+make
+make run
+```
 
-## Contributing
-See [`docs/architecture.md`](docs/architecture.md) for the initial architecture and roadmap. Contributions should preserve user privacy, accessibility, security, and the project's original visual identity.
+A cross-compiler such as `i686-elf-gcc`, GNU binutils, GRUB utilities, `xorriso`, and QEMU are required. The prototype's browser UI in `ui/` is separate and is not the OS login system.
+
+## Roadmap
+1. Bootable kernel and text console (current starter)
+2. Interrupts, exceptions, timer, and keyboard input
+3. Memory management and a basic heap
+4. Process model and system calls
+5. Storage and filesystem support
+6. Graphics, input, and a native ENPY desktop shell
+7. Networking, installer, updates, and broader hardware support
 
 ## License
 MIT. See [`LICENSE`](LICENSE).
