@@ -1,14 +1,3 @@
-# ENPY OS Shared Assets
+# ENPY OS shared design tokens
 
-Shared resources for ENPY OS.
-
-## Included assets
-- color tokens
-- font guide
-- icon library placeholder
-- desktop styling notes
-
-## Brand direction
-- Primary color: ENPY cyan
-- Background: deep charcoal / midnight
-- Accent: silver and white interfaces
+Initial brand direction: deep midnight surfaces, cyan/teal accents, and high-contrast readable text. These notes are not final brand specifications; contributions are welcome.
