@@ -47,7 +47,7 @@ iso: check-toolchain $(KERNEL) grub/grub.cfg
 	$(GRUB_MKRESCUE) -o $(ISO) $(ISO_ROOT)
 
 run: $(ISO)
-	$(QEMU) -boot order=d -cdrom $(ISO) -m 128M
+	$(QEMU) -boot order=d,strict=on -cdrom $(ISO) -m 128M
 
 clean:
 	rm -rf $(BUILD_DIR)
