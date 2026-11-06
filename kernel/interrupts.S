@@ -1,5 +1,3 @@
-#include <stdint.h>
-
 /* Assemble for 32-bit x86. */
 .section .text
 .global isr_stub
