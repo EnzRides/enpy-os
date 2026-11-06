@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#07172f"/>
+      <stop offset="0.55" stop-color="#123d62"/>
+      <stop offset="1" stop-color="#22a6a1"/>
+    </linearGradient>
+    <radialGradient id="sun">
+      <stop offset="0" stop-color="#ffe9a8"/>
+      <stop offset="1" stop-color="#ff9b72"/>
+    </radialGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#sky)"/>
+  <circle cx="1450" cy="390" r="190" fill="url(#sun)" opacity="0.95"/>
+  <path d="M0 690 280 500 510 690 790 430 1080 700 1330 500 1600 700 1810 520 1920 610V1080H0Z" fill="#164c67" opacity="0.8"/>
+  <path d="m0 820 350-210 280 180 360-260 330 270 320-210 280 180v310H0Z" fill="#0c344f"/>
+  <path d="M0 930 360 760l350 190 420-240 360 240 430-220v350H0Z" fill="#08263e"/>
+  <path d="M0 1010q300-100 600 0t600 0 720 0v70H0Z" fill="#071b31"/>
+  <g fill="#53e0d1" opacity="0.75">
+    <circle cx="220" cy="230" r="5"/><circle cx="380" cy="160" r="4"/><circle cx="690" cy="280" r="5"/>
+    <circle cx="980" cy="170" r="4"/><circle cx="1190" cy="260" r="5"/><circle cx="1680" cy="170" r="4"/>
+  </g>
+  <text x="115" y="170" fill="#f3f8ff" font-family="sans-serif" font-size="36" letter-spacing="9" opacity="0.9">ENPY OS</text>
+  <text x="118" y="218" fill="#b9dbe5" font-family="sans-serif" font-size="18" letter-spacing="5" opacity="0.8">A CLEARER WAY TO COMPUTE</text>
+</svg>

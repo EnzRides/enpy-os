@@ -1,0 +1,11 @@
+NAME="ENPY OS"
+PRETTY_NAME="ENPY OS 0.1 (Debian GNU/Linux 13)"
+ID=enpy
+ID_LIKE=debian
+VERSION="0.1"
+VERSION_ID="0.1"
+VERSION_CODENAME="enpy"
+HOME_URL="https://github.com/EnzRides/enpy-os"
+SUPPORT_URL="https://github.com/EnzRides/enpy-os/issues"
+BUG_REPORT_URL="https://github.com/EnzRides/enpy-os/issues"
+DEBIAN_CODENAME="trixie"
