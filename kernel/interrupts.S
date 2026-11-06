@@ -1,5 +1,6 @@
 /* Assemble for 32-bit x86. */
 .section .text
+
 .global isr_stub
 .type isr_stub, @function
 isr_stub:
@@ -22,18 +23,6 @@ irq1_stub:
 idt_flush:
     mov 4(%esp), %eax
     lidt (%eax)
-    ret
-
-.global enable_interrupts
-.type enable_interrupts, @function
-enable_interrupts:
-    sti
-    ret
-
-.global disable_interrupts
-.type disable_interrupts, @function
-disable_interrupts:
-    cli
     ret
 
 .section .note.GNU-stack,"",@progbits
