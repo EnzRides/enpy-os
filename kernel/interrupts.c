@@ -109,8 +109,8 @@ int init_mouse(void) {
     outb(0x64, 0x20);
     if (!wait_output_full()) return 0;
     uint8_t config = inb(0x60);
-    /* Clear mouse-clock-disable and keep mouse IRQ12 disabled (polled input). */
-    config = (uint8_t)(config & (uint8_t)~0x22);
+    /* Clear only the second-port clock-disable bit; keep IRQ12 disabled. */
+    config = (uint8_t)(config & (uint8_t)~0x20);
     if (!wait_input_clear()) return 0;
     outb(0x64, 0x60);
     if (!wait_input_clear()) return 0;
