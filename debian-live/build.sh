@@ -18,10 +18,13 @@ if [[ ! -r "$DEBIAN_KEYRING" ]]; then
     exit 1
 fi
 
-# Explicitly set Debian mirrors so host defaults (e.g. Ubuntu's archive URL)
-# cannot be reused for the Debian Trixie bootstrap. live-build has no separate
-# bootstrap-security mirror option; security mirrors apply to chroot and binary.
+# Explicit Debian mode is essential when live-build runs on Ubuntu: without it,
+# live-build selects Ubuntu's mode and parent mirrors from the host defaults.
+# Explicit mirrors prevent host defaults from being reused for Debian Trixie.
+# live-build has no separate bootstrap-security mirror option; security mirrors
+# apply to chroot and binary stages.
 lb config \
+    --mode debian \
     --distribution trixie \
     --architectures amd64 \
     --binary-images iso-hybrid \
