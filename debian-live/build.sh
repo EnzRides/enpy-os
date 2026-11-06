@@ -19,7 +19,8 @@ if [[ ! -r "$DEBIAN_KEYRING" ]]; then
 fi
 
 # Explicitly set Debian mirrors so host defaults (e.g. Ubuntu's archive URL)
-# cannot be reused for the Debian Trixie bootstrap.
+# cannot be reused for the Debian Trixie bootstrap. live-build has no separate
+# bootstrap-security mirror option; security mirrors apply to chroot and binary.
 lb config \
     --distribution trixie \
     --architectures amd64 \
@@ -28,7 +29,6 @@ lb config \
     --mirror-bootstrap https://deb.debian.org/debian \
     --mirror-chroot https://deb.debian.org/debian \
     --mirror-binary https://deb.debian.org/debian \
-    --mirror-bootstrap-security https://security.debian.org/debian-security \
     --mirror-chroot-security https://security.debian.org/debian-security \
     --mirror-binary-security https://security.debian.org/debian-security \
     --debian-installer live
